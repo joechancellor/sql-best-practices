@@ -6,7 +6,7 @@ from typing import Generator
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "..", "products.db")
 
-logger = logging.getLogger("werkzeug")
+logger = logging.getLogger(__name__)
 
 @contextlib.contextmanager
 def get_connection() -> Generator[sqlite3.Connection, None, None]:

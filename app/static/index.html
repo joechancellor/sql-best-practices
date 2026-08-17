@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Product Catalog</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f4f6fb;
+      color: #222;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #1a56db;
+      color: #fff;
+      padding: 1rem 2rem;
+    }
+    header h1 { font-size: 1.5rem; font-weight: 700; }
+
+    main { display: flex; gap: 1.5rem; padding: 1.5rem 2rem; }
+
+    /* Sidebar filters */
+    #filters {
+      flex: 0 0 240px;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1.25rem;
+      height: fit-content;
+    }
+    #filters h2 { font-size: 1rem; margin-bottom: 1rem; color: #444; }
+
+    .filter-group { margin-bottom: 1rem; }
+    .filter-group label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 0.3rem;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    .filter-group select,
+    .filter-group input[type="number"] {
+      width: 100%;
+      padding: 0.4rem 0.5rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      background: #fff;
+    }
+    .filter-group input[type="range"] { width: 100%; cursor: pointer; }
+    .range-value { font-size: 0.82rem; color: #1a56db; font-weight: 600; }
+
+    .price-row { display: flex; gap: 0.5rem; }
+    .price-row input { width: 50%; }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    .checkbox-label input { width: 1rem; height: 1rem; cursor: pointer; }
+
+    #btn-reset {
+      width: 100%;
+      margin-top: 0.5rem;
+      padding: 0.5rem;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    #btn-reset:hover { background: #e2e8f0; }
+
+    /* Results panel */
+    #results { flex: 1; }
+
+    #results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+    #results-header h2 { font-size: 1rem; color: #444; }
+    #result-count { font-size: 0.85rem; color: #888; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      overflow: hidden;
+      font-size: 0.9rem;
+    }
+    thead th {
+      background: #1a56db;
+      color: #fff;
+      padding: 0.65rem 0.75rem;
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    tbody tr { border-bottom: 1px solid #f1f5f9; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #f8fafc; }
+    tbody td { padding: 0.65rem 0.75rem; }
+
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .badge-green { background: #dcfce7; color: #166534; }
+    .badge-red   { background: #fee2e2; color: #991b1b; }
+
+    .stars { color: #f59e0b; font-size: 0.9rem; }
+
+    #empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: #888;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🛒 Product Catalog</h1>
+</header>
+
+<main>
+  <!-- Filter sidebar -->
+  <aside id="filters">
+    <h2>Filters</h2>
+
+    <div class="filter-group">
+      <label for="sel-category">Category</label>
+      <select id="sel-category">
+        <option value="">All categories</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label for="sel-brand">Brand</label>
+      <select id="sel-brand">
+        <option value="">All brands</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Price range (£)</label>
+      <div class="price-row">
+        <input type="number" id="min-price" placeholder="Min" min="0" step="1" />
+        <input type="number" id="max-price" placeholder="Max" min="0" step="1" />
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <label for="min-rating">
+        Min rating &nbsp;<span class="range-value" id="rating-display">Any</span>
+      </label>
+      <input type="range" id="min-rating" min="0" max="5" step="0.5" value="0" />
+    </div>
+
+    <div class="filter-group">
+      <label class="checkbox-label">
+        <input type="checkbox" id="in-stock" />
+        In stock only
+      </label>
+    </div>
+
+    <button id="btn-reset">Reset filters</button>
+  </aside>
+
+  <!-- Results -->
+  <section id="results">
+    <div id="results-header">
+      <h2>Products</h2>
+      <span id="result-count"></span>
+    </div>
+
+    <div id="table-container"></div>
+  </section>
+</main>
+
+<script>
+  const selCategory  = document.getElementById("sel-category");
+  const selBrand     = document.getElementById("sel-brand");
+  const minPriceEl   = document.getElementById("min-price");
+  const maxPriceEl   = document.getElementById("max-price");
+  const minRatingEl  = document.getElementById("min-rating");
+  const ratingDisplay= document.getElementById("rating-display");
+  const inStockEl    = document.getElementById("in-stock");
+  const countEl      = document.getElementById("result-count");
+  const container    = document.getElementById("table-container");
+
+  // Load dropdown options
+  async function loadFilters() {
+    const res = await fetch("/api/filters");
+    const { categories, brands } = await res.json();
+
+    categories.forEach(c => {
+      const opt = document.createElement("option");
+      opt.value = c; opt.textContent = c;
+      selCategory.appendChild(opt);
+    });
+    brands.forEach(b => {
+      const opt = document.createElement("option");
+      opt.value = b; opt.textContent = b;
+      selBrand.appendChild(opt);
+    });
+  }
+
+  // Fetch and render products
+  async function fetchProducts() {
+    const params = new URLSearchParams();
+    if (selCategory.value)  params.set("category",   selCategory.value);
+    if (selBrand.value)     params.set("brand",       selBrand.value);
+    if (minPriceEl.value)   params.set("min_price",   minPriceEl.value);
+    if (maxPriceEl.value)   params.set("max_price",   maxPriceEl.value);
+    if (inStockEl.checked)  params.set("in_stock",    "1");
+    const rating = parseFloat(minRatingEl.value);
+    if (rating > 0)         params.set("min_rating",  rating);
+
+    const res  = await fetch("/api/products?" + params.toString());
+    const data = await res.json();
+    renderTable(data);
+  }
+
+  function stars(rating) {
+    if (rating == null) return "—";
+    const full  = Math.floor(rating);
+    const half  = rating - full >= 0.5 ? 1 : 0;
+    const empty = 5 - full - half;
+    return `<span class="stars">${"★".repeat(full)}${"½".repeat(half)}${"☆".repeat(empty)}</span> ${rating.toFixed(1)}`;
+  }
+
+  function renderTable(rows) {
+    countEl.textContent = `${rows.length} result${rows.length !== 1 ? "s" : ""}`;
+
+    if (rows.length === 0) {
+      container.innerHTML = `<div id="empty-state">No products match the selected filters.</div>`;
+      return;
+    }
+
+    const html = `
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Brand</th>
+            <th>Price</th>
+            <th>Rating</th>
+            <th>Stock</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map(p => `
+            <tr>
+              <td>${escHtml(p.name)}</td>
+              <td>${escHtml(p.category)}</td>
+              <td>${escHtml(p.brand)}</td>
+              <td>£${p.price.toFixed(2)}</td>
+              <td>${stars(p.rating)}</td>
+              <td><span class="badge ${p.is_in_stock ? "badge-green" : "badge-red"}">
+                ${p.is_in_stock ? "In stock" : "Out of stock"}
+              </span></td>
+            </tr>`).join("")}
+        </tbody>
+      </table>`;
+    container.innerHTML = html;
+  }
+
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  // Rating slider label
+  minRatingEl.addEventListener("input", () => {
+    const v = parseFloat(minRatingEl.value);
+    ratingDisplay.textContent = v > 0 ? `${v}+` : "Any";
+    fetchProducts();
+  });
+
+  // All other filter controls
+  [selCategory, selBrand, minPriceEl, maxPriceEl, inStockEl].forEach(el => {
+    el.addEventListener("change", fetchProducts);
+  });
+
+  // Reset
+  document.getElementById("btn-reset").addEventListener("click", () => {
+    selCategory.value = "";
+    selBrand.value    = "";
+    minPriceEl.value  = "";
+    maxPriceEl.value  = "";
+    minRatingEl.value = 0;
+    ratingDisplay.textContent = "Any";
+    inStockEl.checked = false;
+    fetchProducts();
+  });
+
+  // Init
+  loadFilters().then(fetchProducts);
+</script>
+
+</body>
+</html>

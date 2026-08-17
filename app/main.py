@@ -37,31 +37,27 @@ def list_products():
     conditions: list[str] = []
     params:     list      = []
 
-    if category:
-        conditions.append("category = ?")
-        params.append(category)
-    if brand:
-        conditions.append("brand = ?")
-        params.append(brand)
-    if min_price is not None:
-        conditions.append("price >= ?")
-        params.append(min_price)
-    if max_price is not None:
-        conditions.append("price <= ?")
-        params.append(max_price)
-    if in_stock == "1":
-        conditions.append("is_in_stock = 1")
-    if min_rating is not None:
-        conditions.append("rating >= ?")
-        params.append(min_rating)
-
-    where_clause = ("WHERE " + " AND ".join(conditions)) if conditions else ""
-    sql = f"""
+    sql = """
         SELECT id, name, category, brand, price, is_in_stock, rating
         FROM products
-        {where_clause}
+        WHERE
+            (:category IS NULL OR category = :category)
+            AND (:brand IS NULL OR brand = :brand)
+            AND (:min_price IS NULL OR price >= :min_price)
+            AND (:max_price IS NULL OR price <= :max_price)
+            AND (:in_stock IS NULL OR is_in_stock = :in_stock)
+            AND (:min_rating IS NULL OR rating >= :min_rating)
         ORDER BY name
     """
+
+    params = {
+        "category": category or None,
+        "brand": brand or None,
+        "min_price": min_price,
+        "max_price": max_price,
+        "in_stock": 1 if in_stock == "1" else None,
+        "min_rating": min_rating,
+    }
 
     with get_connection() as conn:
         rows = conn.execute(sql, params).fetchall()

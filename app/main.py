@@ -34,8 +34,6 @@ def list_products():
     in_stock   = request.args.get("in_stock")
     min_rating = request.args.get("min_rating", type=float)
 
-    conditions: list[str] = []
-    params:     list      = []
 
     sql = """
         SELECT id, name, category, brand, price, is_in_stock, rating

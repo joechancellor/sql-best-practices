@@ -20,6 +20,8 @@ When reviewing SQL code in this repository, apply the following best practices. 
 - Avoid applying functions to indexed columns on the left-hand side of a condition (e.g., `WHERE YEAR(created_at) = 2024`) as this prevents index use; rewrite as range comparisons (`WHERE created_at >= '2024-01-01' AND created_at < '2025-01-01'`).
 - Use `IS NULL` / `IS NOT NULL` instead of `= NULL` / `!= NULL`.
 - Prefer explicit `JOIN` conditions over implicit cross joins in the `FROM` clause.
+- Avoid catch-all optional-filter predicates such as `(:param IS NULL OR column = :param)` in production queries on large tables, because they often prevent selective index use.
+- Prefer handling optional filter logic in application code by building query predicates only for provided filters, while still using parameterized values.
 
 ## JOINs
 

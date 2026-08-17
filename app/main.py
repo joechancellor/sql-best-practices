@@ -7,10 +7,8 @@ import os
 
 app = Flask(__name__, static_folder="static", static_url_path="")
 
-
-@app.before_request
-def setup() -> None:
-    init_db()
+# Initialise the database once at startup
+init_db()
 
 
 # ---------------------------------------------------------------------------
@@ -96,4 +94,5 @@ def index():
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(debug=True, port=port)
+    debug = os.environ.get("FLASK_DEBUG", "0") == "1"
+    app.run(debug=debug, port=port)

@@ -1,13 +1,20 @@
+import contextlib
 import sqlite3
 import os
+from typing import Generator
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "..", "products.db")
 
 
-def get_connection() -> sqlite3.Connection:
+@contextlib.contextmanager
+def get_connection() -> Generator[sqlite3.Connection, None, None]:
+    """Yield a SQLite connection and always close it on exit."""
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
-    return conn
+    try:
+        yield conn
+    finally:
+        conn.close()
 
 
 def init_db() -> None:

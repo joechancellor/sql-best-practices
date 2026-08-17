@@ -33,15 +33,15 @@ PRODUCTS = [
 def seed() -> None:
     init_db()
     with get_connection() as conn:
-        conn.execute("DELETE FROM products")
-        conn.executemany(
-            """
-            INSERT INTO products (name, category, brand, price, is_in_stock, rating)
-            VALUES (?, ?, ?, ?, ?, ?)
-            """,
-            PRODUCTS,
-        )
-        conn.commit()
+        with conn:  # single transaction — rolls back if executemany fails
+            conn.execute("DELETE FROM products")
+            conn.executemany(
+                """
+                INSERT INTO products (name, category, brand, price, is_in_stock, rating)
+                VALUES (?, ?, ?, ?, ?, ?)
+                """,
+                PRODUCTS,
+            )
     print(f"Seeded {len(PRODUCTS)} products.")
 
 

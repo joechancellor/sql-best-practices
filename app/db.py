@@ -14,9 +14,8 @@ def get_connection() -> Generator[sqlite3.Connection, None, None]:
     
     conn = sqlite3.connect(DB_PATH)
 
-    conn.set_trace_callback(
-        lambda sql: logger.info("SQL EXECUTED: %s", sql)
-    )
+    if os.environ.get("SQL_TRACE", "0") == "1":
+        conn.set_trace_callback(lambda sql: logger.debug("SQL EXECUTED: %s", sql))
 
     conn.row_factory = sqlite3.Row
     try:

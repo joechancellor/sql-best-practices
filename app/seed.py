@@ -1,5 +1,8 @@
 """Seed the products table with sample data."""
-from db import init_db, get_connection
+try:
+    from app.db import init_db, get_connection
+except ImportError:  # pragma: no cover - supports direct script execution
+    from db import init_db, get_connection
 
 PRODUCTS = [
     ("Wireless Headphones Pro",   "Electronics", "SoundMax",   89.99,  1, 4.5),

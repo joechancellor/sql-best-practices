@@ -14,18 +14,27 @@ A Python + SQLite web app with a filterable product catalog.
 ### Setup
 
 ```bash
-# 1. Install dependencies
-pip install -r requirements.txt
+# 1. Activate the project virtual environment
+source .venv/bin/activate
 
-# 2. Seed the database (creates products.db in the repo root)
-cd app
-python seed.py
+# 2. Install dependencies
+python -m pip install -r requirements.txt
 
-# 3. Start the server
-python main.py
+# 3. Seed the database (creates products.db in the repo root)
+python -m app.seed
+
+# 4. Start the server
+python -m app.main
 ```
 
 Then open http://localhost:5000 in your browser.
+
+### Run tests
+
+```bash
+source .venv/bin/activate
+python -m pytest -q
+```
 
 ### API Endpoints
 
